@@ -196,4 +196,3 @@ total=0
 for i in pyramid:
     total+=max(i)
 print(total)'''
-
