@@ -1,0 +1,199 @@
+# multiplication table
+'''x=int(input("enter which table?"))
+y=int(input('tillhow many tables?'))
+for i in range(1,y+1):
+    print(x,' x ',i,'=',x*i)'''
+
+
+    
+#no of sentences that starts with p
+'''n=int(input('enter how many sequence of sentence:'))
+l=[]
+count=0
+for i in range(n):
+    x=input('enter sentence one by one')
+    l.append(x)
+for i in l:
+    if i[0].lower()=='p':
+        count+=1
+print(count)'''
+
+
+# pattern*
+
+'''for i in range(6):
+    for j in range(1,i+1):
+        print('*',end='')
+    print()'''
+
+
+#squareseries
+
+'''n=int(input('enterhow many sequence:'))
+for i in range(1,n+1):
+    print(i**2)'''
+
+
+#occrance of a letter
+'''x=input('enter a word/sentence')
+d={}
+for i in x:
+    if i not in d:
+        d[i]=1
+    elif i in d:
+        d[i]+=1
+for k,v in d.items():
+    print(k,'-->',v)'''
+
+
+#perfect square or not
+'''n=int(input('enter the number to be checked:'))
+x=n**0.5
+if x.is_integer():
+    print('yes its a perfect square number')
+else:
+    print('no its not a perfect square number')'''
+
+
+#sort and return middle element
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+l_n=[]
+for i in range(len(l)):
+    x=min(l)
+    l.remove(x)
+    l_n.append(x)
+if len(l_n)%2==0:
+    print(l_n[(len(l_n)+1)//2],l_n[(len(l_n)-1)//2])
+else:
+    print(l_n[len(l_n)//2])'''
+
+
+# most repeated element ina array
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+d={}
+for i in l:
+    if i not in d:
+        d[i]=1
+    elif i in d:
+        d[i]+=1
+m=max(d.values())
+for k,v in d.items():
+    if v==m:
+        print(k,'-->',v)'''
+
+
+# sum of no./3 and 5 till 100
+'''sum_=0
+for i in range(1,101):
+    if i%3==0 or i%5==0:
+        sum_+=i
+print('the final output is',sum_)'''
+
+
+# additive sequence
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+flag = 1  # assume it's additive
+for i in range(len(l) - 2):
+    if l[i] + l[i + 1] != l[i + 2]:
+        flag = 0
+        break
+
+if flag == 1:
+    print('y')
+else:
+    print('n')'''
+
+
+# sum of digits(1234->1+2+3+4)
+'''n=int(input('enter the number:'))
+s=0
+for i in range(len(str(n))):
+    x=n%10
+    s+=x
+    n=n//10
+print(s)'''
+
+# sum of three numbers = target
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+t=int(input('enter the target number'))
+flag=0
+for i in range(len(l)):
+    for j in range(i+1,len(l)):
+        for k in range(j+1,len(l)):
+            if l[i]+l[j]+l[k]==t:
+                print(l[i],l[j],l[k])
+                print('these are the combinations')
+                flag=1
+if flag == 0:
+    print('n')'''
+
+
+# check GP
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+flag=1
+for i in range(len(l)-2):
+    if (l[i+1]/l[i])!=(l[i+2]/l[i+1]):
+        flag=0
+        break
+if flag==1:
+    print('y')
+else:
+    print('n')
+'''
+# square of a number lesser element
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+x=l[0]
+for i in l:
+    
+    if i<x:
+        x=i
+print(x**2)'''
+# square of a number lesser element
+'''n=int(input('how many elements'))
+l=[]
+for i in range(n):
+    a=int(input('enter the element one by one'))
+    l.append(a)
+t=int(input('enter the target number'))
+k=[]
+for i in l:
+    if i**2<t:
+        k.append(i)
+for j in k :
+    print(j)'''
+#pyramid
+#   1
+#  24
+# 352
+#4823
+
+'''pyramid=[[1],[2,4],[3,5,2],[4,8,2,3]]
+total=0
+for i in pyramid:
+    total+=max(i)
+print(total)'''
+
