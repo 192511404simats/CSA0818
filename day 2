@@ -1,0 +1,345 @@
+#1 swapping
+'''
+a=eval(input('a?'))
+b=eval(input('b?'))
+a,b=b,a
+print('swapped a is',a,'swapped b is',b)
+'''
+
+
+#2 square and cube
+'''
+n=eval(input('n?'))
+print('square:',n*n,'\ncube:',n**3)
+'''
+
+
+#3 c to f
+'''
+c=eval(input('c?'))
+print('farenheit:',c*(5/9)+32)
+'''
+
+
+
+#4 f to c
+'''
+f=eval(input('f?'))
+print('celcius:',(f-32)*95)
+
+'''
+
+
+
+#5 find avg of +ve and -ve of a sequemce until -1 pressed
+'''
+a=0
+b=0
+a_n=0
+b_n=0
+l=[]
+while True:
+    n=int(input('enter the number:'))
+    if n==-1:
+        break
+    elif n<0:
+        a+=n
+    elif n>0:
+        b+=n
+    l.append(n)
+for i in l:
+    if i<0:
+        a_n+=1
+    elif i>0:
+        b_n+=1
+print('avg. of -ve is',a/a_n,'\n avg. of positive number is:',b/b_n)
+'''
+
+
+
+# 6 pattern
+'''
+s=input('enter the symbol:')
+n=int(input('No. of rows:'))
+for i in range(n):
+    for j in range(i+1):
+        print(s,end='')
+    print()
+'''
+
+
+
+#7 leap year
+'''
+n=int(input('enter the year:'))
+if (n%4==0 and n%100!=0) or n%400 == 0:
+    print('yes its leap year')
+else:
+    print('no its not a leap year')
+'''
+
+
+
+#8 eliminate duplicate element
+'''
+l=eval(input('l?'))
+l_n=[]
+for i in l:
+    if i not in l_n:
+        l_n.append(i)
+    if i in l_n:
+        pass
+print(l,'\n',l_n)
+'''
+
+
+#9 check for +ve and -ve
+'''
+while True:
+    n=float(input('num?'))
+    if n<0:
+        print(n,'is -ve')
+    elif n>0:
+        print(n,'is +ve')
+    else:
+        pass
+    x=input('do you wanna continue(answer in y/n):')
+    if x=='y':
+        continue
+    elif x=='n':
+        break
+    else:
+        print('invalid input')
+        break
+'''
+
+
+
+#10 mean median mode
+'''
+n=int(input('enter how many numbers'))
+l=[]
+for i in range(n):
+    x=int(input('enter elements one by one'))
+    l.append(x)
+#mean
+mean=sum(l)/len(l)
+print('the mean is ',mean)
+#median
+l_n=sorted(l)
+t=len(l_n)
+if t%2==0:
+    print('the medians are',l_n[(t-1)//2],'and',l_n[(t+1)//2])
+else:
+    print('the median is  ',l_n[t//2])
+# mode
+d={}
+for i in l:
+    if i not in d:
+        d[i]=1
+    elif i in d:
+        d[i]+=1
+m=max(d.values())
+for k,v in d.items():
+    if v==m:
+        print('the mode of a given list is',k)
+'''
+        
+
+
+#11 decreasing order(non increasing)
+'''
+l=[]
+n=int(input('enter how many elements:'))
+for i in range(n):
+    x=int(input('enter the element one by one:'))
+    l.append(x)
+l_n=[]
+for i in range(len(l)):
+    x=max(l)
+    l.remove(x)
+    l_n.append(x)
+print('thus reorderes in non increasing way, ',l_n)
+'''
+
+
+
+#12 intersecting elements between lists
+'''
+l1=[]
+n=int(input('enter how many elements in 1st list:'))
+for i in range(n):
+    x=int(input('enter the element one by one:'))
+    l1.append(x)
+l2=[]
+n=int(input('enter how many elements in 2nd list:'))
+for i in range(n):
+    x=int(input('enter the element one by one:'))
+    l2.append(x)
+l=[]
+flag=0
+for i in l1:
+    if i in l2:
+        l.append(i)
+        flag=1
+    elif i not in l2:
+        pass
+if flag==0:
+    print('no intersections found')
+if flag==1:
+    for j in l:
+        print('the intersecting point is:',j)
+'''
+
+
+
+#13 prime or composite
+'''
+a=int(input('enter the starting number of a range'))
+b=int(input('enter the ending number of a range'))
+for i in range(a,b+1):
+    if i<2:
+        print(i,' is neither prime nor composite')
+        continue
+    composite=False
+    for j in range(2,int(i**0.5)+1):
+        if i%j==0:
+            composite=True
+            break
+    if composite:
+        print(i,'composite')
+    else:
+        print(i,'prime')
+'''
+
+
+
+# 14 USING   FUNCTION
+
+
+'''
+def square():
+    a=float(input('enter a number to be squared'))
+    print('square of a number is:',a*a)
+def area_circle():
+    r=float(input('enter radius;'))
+    print('are of a circle is:',3.14*r*r)
+def celcius_farenheit():
+    c=float(input('enter celcius:'))
+    print('the farenheit is:',c*(5/9)+32)
+def greater_number():
+    a=float(input('enter 1st number:'))
+    b=float(input('enter 2nd number:'))
+    if a<b:
+        print(b,'is greater')
+    if a>b:
+        print(a,'is greater')
+    if a==b:
+        print('both',a,'and',b,'are equal')
+square()
+area_circle()
+celcius_farenheit()
+greater_number()
+'''
+
+
+#15 simple interest
+'''
+def simple_interest():
+    p=float(input('enter principal amount'))
+    n=float(input('enter number of years'))
+    r=float(input('enter rate of interest'))
+    si=(p*n*r)/100
+    return si
+print('the simple interest is',simple_interest())
+'''
+
+
+
+#16 greatest of three numbers
+'''
+def greatest_of_3():
+    a=float(input('enter 1st number'))
+    b=float(input('enter 2nd number'))
+    c=float(input('enter 3rd number'))
+    if a>b and a>c:
+        print(a,' is greater')
+    if b>a and b>c:
+        print(b,' is greater')
+    if c>a and c>b:
+        print(c,' is greater')
+greatest_of_3()
+'''
+
+
+#17 lcm and gcd of three numbers
+'''
+def lcm_gcd_3():
+    a=int(input('enter 1st number'))
+    b=int(input('enter 2nd number'))
+    c=int(input('enter 3rd number'))
+    x,y=a,b
+    while y!=0:
+        x,y=y,x%y
+    gcd_ab=x
+    #a= gcd_ab
+    x,y=gcd_ab,c
+    while y!=0:
+        x,y=y,x%y
+    gcd_abc=x
+    #a=gcd_abc
+    print('gcd of the given three numbers is ',gcd_abc)
+    lcm_ab=a*b//gcd_ab
+    lcm_abc=lcm_ab*c//gcd_abc
+    print('lcm of the given three numbers is ',lcm_abc)
+lcm_gcd_3()
+'''
+
+
+#18 palindrome
+'''
+def palindrome_check():
+    while True:
+        
+        a=input('1.string or 2.integer[1 or 2]:')
+        if a =='1':
+            x=input('enter a string')
+            y=x[::-1]
+            if x==y:
+                print('yes',x,'is a palindrom')
+            else:
+                print('no',x,'is not a palindrom')
+        if a=='2':
+            p=int(input('enter a integer'))
+            q=str(p)
+            r=q[::-1]
+            if q==r:
+                print('yes',p,'is a palindrom')
+            else:
+                print('no',p,'is not a palindrom')
+        x=input('do you wanna continue(answer in y/n):')
+        if x=='y':
+            continue
+        elif x=='n':
+            break
+        else:
+            print('invalid input')
+            break
+            
+palindrome_check()
+'''
+
+
+#19 fibanacci series
+'''
+l=[0,1]
+for i in range(int(input('enter how many sequence:'))):
+    x=l[i]+l[i+1]
+    l.append(x)
+for i in l:
+    print(i,end=',')
+'''
+
+
+
+    
