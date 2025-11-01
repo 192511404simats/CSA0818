@@ -1,28 +1,48 @@
-
 import sqlite3
+from datetime import datetime, date
+import time
+import threading
+from plyer import notification
 
-# Create or connect to the database
-conn = sqlite3.connect('saving_goals.db')
+# Connect or create database
+conn = sqlite3.connect('saving_goals.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# Create table if it doesn't exist
+# Create table with reminder date & time columns
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     target_amount REAL NOT NULL,
-    current_amount REAL DEFAULT 0
+    current_amount REAL DEFAULT 0,
+    reminder_date TEXT,
+    reminder_time TEXT
 )
 ''')
 conn.commit()
+
+# Try to add missing columns (for old databases)
+for col in ["reminder_date", "reminder_time"]:
+    try:
+        cursor.execute(f"ALTER TABLE goals ADD COLUMN {col} TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # Column already exists
 
 
 def add_goal():
     name = input("Enter goal name: ")
     target = float(input("Enter target amount: "))
-    cursor.execute("INSERT INTO goals (name, target_amount) VALUES (?, ?)", (name, target))
+
+    reminder_date = input("Enter reminder date (YYYY-MM-DD) — first reminder date: ").strip()
+    reminder_time = input("Enter reminder time (HH:MM in 24-hour format) — e.g., 09:00: ").strip()
+
+    cursor.execute(
+        "INSERT INTO goals (name, target_amount, reminder_date, reminder_time) VALUES (?, ?, ?, ?)",
+        (name, target, reminder_date, reminder_time)
+    )
     conn.commit()
-    print("✅ Goal added successfully!\n")
+    print("✅ Goal added successfully with monthly reminder!\n")
 
 
 def view_goals():
@@ -33,22 +53,26 @@ def view_goals():
         return
 
     print("\nYour Saving Goals:")
-    print("-" * 40)
+    print("-" * 60)
     for g in goals:
-        id, name, target, current = g
+        id, name, target, current, r_date, r_time = g
         percent = (current / target * 100) if target > 0 else 0
         print(f"ID: {id}")
         print(f"Goal: {name}")
         print(f"Target: ${target:.2f}")
         print(f"Saved: ${current:.2f} ({percent:.1f}%)")
-        print("-" * 40)
+        if r_date:
+            print(f"Reminder Date: {r_date}")
+        if r_time:
+            print(f"Reminder Time: {r_time}")
+        print("-" * 60)
     print()
 
 
 def update_goal():
     goal_id = input("Enter goal ID to update: ")
     add_amount = float(input("Enter amount to add: "))
-    cursor.execute("SELECT current_amount, target_amount FROM goals WHERE id = ?", (goal_id,))
+    cursor.execute("SELECT current_amount FROM goals WHERE id = ?", (goal_id,))
     goal = cursor.fetchone()
 
     if goal:
@@ -64,11 +88,61 @@ def delete_goal():
     goal_id = input("Enter goal ID to delete: ")
     cursor.execute("DELETE FROM goals WHERE id = ?", (goal_id,))
     conn.commit()
-    print("🗑 Goal deleted (if it existed).\n")
+    print("🗑 Goal deleted.\n")
+
+
+def send_notification(title, message):
+    """Send a desktop notification."""
+    notification.notify(
+        title=title,
+        message=message,
+        timeout=10
+    )
+
+
+def check_reminders():
+    """Check for reminders that match today and current time."""
+    now = datetime.now()
+    today = now.date().isoformat()
+    current_time = now.strftime("%H:%M")
+
+    cursor.execute("SELECT id, name, reminder_date, reminder_time FROM goals WHERE reminder_date IS NOT NULL")
+    reminders = cursor.fetchall()
+
+    for g in reminders:
+        goal_id, name, r_date, r_time = g
+        if r_time and current_time == r_time:
+            # Send notification for monthly saving
+            send_notification("💰 Monthly Saving Reminder",
+                              f"It's {r_time}! Time to save for your goal '{name}'.")
+            print(f"🔔 {r_time} — Reminder for '{name}' triggered!\n")
+
+            # Move next reminder to next month automatically
+            try:
+                d = datetime.strptime(r_date, "%Y-%m-%d")
+                next_month = d.replace(month=d.month + 1 if d.month < 12 else 1,
+                                       year=d.year if d.month < 12 else d.year + 1)
+                new_date = next_month.date().isoformat()
+                cursor.execute("UPDATE goals SET reminder_date = ? WHERE id = ?", (new_date, goal_id))
+                conn.commit()
+            except Exception as e:
+                print(f"(⚠️ Could not update next reminder: {e})")
+
+
+def reminder_loop():
+    """Run in background to check reminders every minute."""
+    while True:
+        check_reminders()
+        time.sleep(60)  # check every minute
 
 
 def main():
-    print("=== 💰 Saving Goal Tracker (Python Console) ===")
+    print("=== 💰 Saving Goal Tracker with Monthly Time Reminder ===")
+
+    # Start background thread for automatic checks
+    reminder_thread = threading.Thread(target=reminder_loop, daemon=True)
+    reminder_thread.start()
+
     while True:
         print("\nChoose an option:")
         print("1️⃣  Add new goal")
