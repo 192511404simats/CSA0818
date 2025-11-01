@@ -1,0 +1,99 @@
+
+import sqlite3
+
+# Create or connect to the database
+conn = sqlite3.connect('saving_goals.db')
+cursor = conn.cursor()
+
+# Create table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    target_amount REAL NOT NULL,
+    current_amount REAL DEFAULT 0
+)
+''')
+conn.commit()
+
+
+def add_goal():
+    name = input("Enter goal name: ")
+    target = float(input("Enter target amount: "))
+    cursor.execute("INSERT INTO goals (name, target_amount) VALUES (?, ?)", (name, target))
+    conn.commit()
+    print("✅ Goal added successfully!\n")
+
+
+def view_goals():
+    cursor.execute("SELECT * FROM goals")
+    goals = cursor.fetchall()
+    if not goals:
+        print("No goals found.\n")
+        return
+
+    print("\nYour Saving Goals:")
+    print("-" * 40)
+    for g in goals:
+        id, name, target, current = g
+        percent = (current / target * 100) if target > 0 else 0
+        print(f"ID: {id}")
+        print(f"Goal: {name}")
+        print(f"Target: ${target:.2f}")
+        print(f"Saved: ${current:.2f} ({percent:.1f}%)")
+        print("-" * 40)
+    print()
+
+
+def update_goal():
+    goal_id = input("Enter goal ID to update: ")
+    add_amount = float(input("Enter amount to add: "))
+    cursor.execute("SELECT current_amount, target_amount FROM goals WHERE id = ?", (goal_id,))
+    goal = cursor.fetchone()
+
+    if goal:
+        new_amount = goal[0] + add_amount
+        cursor.execute("UPDATE goals SET current_amount = ? WHERE id = ?", (new_amount, goal_id))
+        conn.commit()
+        print("💰 Progress updated!\n")
+    else:
+        print("Goal not found.\n")
+
+
+def delete_goal():
+    goal_id = input("Enter goal ID to delete: ")
+    cursor.execute("DELETE FROM goals WHERE id = ?", (goal_id,))
+    conn.commit()
+    print("🗑 Goal deleted (if it existed).\n")
+
+
+def main():
+    print("=== 💰 Saving Goal Tracker (Python Console) ===")
+    while True:
+        print("\nChoose an option:")
+        print("1️⃣  Add new goal")
+        print("2️⃣  View goals")
+        print("3️⃣  Update goal progress")
+        print("4️⃣  Delete goal")
+        print("5️⃣  Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            add_goal()
+        elif choice == '2':
+            view_goals()
+        elif choice == '3':
+            update_goal()
+        elif choice == '4':
+            delete_goal()
+        elif choice == '5':
+            print("Goodbye! 👋")
+            break
+        else:
+            print("Invalid choice, try again.\n")
+
+
+if __name__ == "__main__":
+    main()
+    conn.close()
