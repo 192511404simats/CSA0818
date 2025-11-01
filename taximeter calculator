@@ -1,0 +1,41 @@
+SOURCE CODE
+def taximeter():
+  l=[]
+  n=int(input('how many lists'))
+  for i in range(n):
+    taxino=int(input('taxi no'))
+    name=input('taxi name:')
+    km=float(input("enter km"))
+    l.append([taxino,name,km])
+  return l
+
+def calculator():
+  l=taximeter()
+  for i in l:
+    if i[2]<=1:
+      print('taxi no is ',i[0],' taxi name:',i[1],'km:',i[2],'fare is 25')
+    elif i[2]<6 and i[2]>1:
+      print('taxi no is ',i[0],' taxi name:',i[1],'km:',i[2],'fare is 10')
+    elif i[2]<12 and i[2]>6:
+      print('taxi no is ',i[0],' taxi name:',i[1],'km:',i[2],'fare is 15')
+    elif i[2]<18 and i[2]>12:
+      print('taxi no is ',i[0],' taxi name:',i[1],'km:',i[2],'fare is 20')
+    elif i[2]>18:
+      print('taxi no is ',i[0],' taxi name:',i[1],'km:',i[2],'fare is 25')
+calculator()
+
+OUTPUT
+
+how many lists3
+taxi no1
+taxi name:a
+enter km1
+taxi no2
+taxi name:b
+enter km5
+taxi no3
+taxi name:c
+enter km15
+taxi no is  1  taxi name: a km: 1.0 fare is 25
+taxi no is  2  taxi name: b km: 5.0 fare is 10
+taxi no is  3  taxi name: c km: 15.0 fare is 20
