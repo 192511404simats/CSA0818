@@ -57,7 +57,7 @@ def generate_pdf_report():
     width, height = letter
 
     c.setFont("Helvetica-Bold", 18)
-    c.drawString(180, height - 50, "💰 Saving Goal Tracker Statement")
+    c.drawString(150, height - 50, "💰 Saving Goal Tracker Statement")
 
     c.setFont("Helvetica", 12)
     y = height - 100
@@ -69,7 +69,7 @@ def generate_pdf_report():
         percent = (current / target * 100) if target > 0 else 0
         c.drawString(50, y, f"Goal: {name}")
         y -= 20
-        c.drawString(70, y, f"Target: ${target:.2f} | Saved: ${current:.2f} ({percent:.1f}%)")
+        c.drawString(70, y, f"Target: ₹{target:.2f} | Saved: ₹{current:.2f} ({percent:.1f}%)")
         y -= 20
         if r_date:
             c.drawString(70, y, f"Reminder Date: {r_date}")
@@ -89,8 +89,8 @@ def generate_pdf_report():
             y = height - 100
 
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(50, 100, f"Total Target: ${total_target:.2f}")
-    c.drawString(50, 80, f"Total Saved: ${total_saved:.2f}")
+    c.drawString(50, 100, f"Total Target: ₹{total_target:.2f}")
+    c.drawString(50, 80, f"Total Saved: ₹{total_saved:.2f}")
     if total_target > 0:
         c.drawString(50, 60, f"Overall Progress: {(total_saved / total_target * 100):.1f}%")
 
@@ -123,7 +123,7 @@ def send_notification(title, message):
 # ---------------- GOAL FUNCTIONS ----------------
 def add_goal():
     name = input("Enter goal name: ")
-    target = float(input("Enter target amount: "))
+    target = float(input("Enter target amount (INR): "))
     reminder_date = input("Enter reminder date (YYYY-MM-DD): ").strip()
     reminder_time = input("Enter reminder time (HH:MM 24hr): ").strip()
     end_date = input("Enter target completion date (YYYY-MM-DD): ").strip()
@@ -150,8 +150,8 @@ def view_goals():
         percent = (current / target * 100) if target > 0 else 0
         print(f"ID: {id}")
         print(f"Goal: {name}")
-        print(f"Target: ${target:.2f}")
-        print(f"Saved: ${current:.2f} ({percent:.1f}%)")
+        print(f"Target: ₹{target:.2f}")
+        print(f"Saved: ₹{current:.2f} ({percent:.1f}%)")
         if r_date:
             print(f"Reminder Date: {r_date}")
         if r_time:
@@ -164,7 +164,7 @@ def view_goals():
 
 def update_goal():
     goal_id = input("Enter goal ID to update: ")
-    add_amount = float(input("Enter amount to add: "))
+    add_amount = float(input("Enter amount to add (INR): "))
     cursor.execute("SELECT current_amount FROM goals WHERE id = ?", (goal_id,))
     goal = cursor.fetchone()
 
@@ -220,7 +220,7 @@ def smart_saving_suggestion():
         else:
             daily = remaining_amount / remaining_days
             weekly = daily * 7
-            print(f"➡️ For '{name}', save around ${daily:.2f} per day or ${weekly:.2f} per week to reach your goal by {end_date}.")
+            print(f"➡️ For '{name}', save around ₹{daily:.2f} per day or ₹{weekly:.2f} per week to reach your goal by {end_date}.")
 
     print("-" * 70 + "\n")
 
@@ -265,8 +265,8 @@ def main():
         print("3️⃣  Update goal progress")
         print("4️⃣  Delete goal")
         print("5️⃣  Generate & Save progress PDF manually")
-        print("6️⃣  Exit")
-        print("7️⃣  Smart Saving Suggestion")
+        print("6️⃣  Smart Saving Suggestion")  
+        print("7️⃣  Exit")  
 
         choice = input("Enter your choice: ")
 
@@ -282,11 +282,11 @@ def main():
             pdf = generate_pdf_report()
             if pdf:
                 open_pdf(pdf)
-        elif choice == '6':
+        elif choice == '6':  
+            smart_saving_suggestion()
+        elif choice == '7': 
             print("Goodbye! 👋")
             break
-        elif choice == '7':
-            smart_saving_suggestion()
         else:
             print("Invalid choice, try again.\n")
 
