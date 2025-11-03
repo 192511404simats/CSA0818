@@ -1,17 +1,17 @@
 import sqlite3
 from datetime import datetime
-import time
-import threading
-import os
-from plyer import notification
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import os
+import webbrowser
 
-# ---------------- DATABASE SETUP ----------------
-conn = sqlite3.connect('saving_goals.db', check_same_thread=False)
+# ------------------------------
+# 📦 Database Setup
+# ------------------------------
+conn = sqlite3.connect("saving_goals.db")
 cursor = conn.cursor()
 
-cursor.execute('''
+cursor.execute("""
 CREATE TABLE IF NOT EXISTS goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -20,242 +20,163 @@ CREATE TABLE IF NOT EXISTS goals (
     reminder_date TEXT,
     reminder_time TEXT
 )
-''')
+""")
 conn.commit()
 
-# Add missing columns for older DB versions
-for col in ["reminder_date", "reminder_time"]:
-    try:
-        cursor.execute(f"ALTER TABLE goals ADD COLUMN {col} TEXT")
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass
+# ------------------------------
+# 🛠 Function to check database structure
+# ------------------------------
+def check_db_structure():
+    cursor.execute("PRAGMA table_info(goals)")
+    columns = cursor.fetchall()
+    if len(columns) != 6:
+        print("⚠️ Database structure outdated. Recreating new database...")
+        conn.close()
+        os.remove("saving_goals.db")
+        os.system("python " + __file__)
+        exit()
 
+check_db_structure()
 
-# ---------------- HELPER FUNCTIONS ----------------
-def ensure_statement_folder():
-    """Ensure local folder exists for saved statements."""
-    folder = os.path.join(os.getcwd(), "Statements")
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    return folder
-
-
-def generate_pdf_report():
-    """Generate a PDF report and save it to local storage."""
-    cursor.execute("SELECT * FROM goals")
-    goals = cursor.fetchall()
-    if not goals:
-        print("No goals to include in report.\n")
-        return None
-
-    # Ensure the Statements folder exists
-    folder = ensure_statement_folder()
-
-    # Create a timestamped filename for statement history
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    filename = f"Statement_{timestamp}.pdf"
-    file_path = os.path.join(folder, filename)
-
-    c = canvas.Canvas(file_path, pagesize=letter)
-    width, height = letter
-
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(180, height - 50, "💰 Saving Goal Tracker Statement")
-
-    c.setFont("Helvetica", 12)
-    y = height - 100
-    total_target = 0
-    total_saved = 0
-
-    for g in goals:
-        id, name, target, current, r_date, r_time = g
-        percent = (current / target * 100) if target > 0 else 0
-        c.drawString(50, y, f"Goal: {name}")
-        y -= 20
-        c.drawString(70, y, f"Target: ${target:.2f} | Saved: ${current:.2f} ({percent:.1f}%)")
-        y -= 20
-        if r_date:
-            c.drawString(70, y, f"Reminder Date: {r_date}")
-            y -= 20
-        if r_time:
-            c.drawString(70, y, f"Reminder Time: {r_time}")
-            y -= 30
-
-        total_target += target
-        total_saved += current
-
-        if y < 100:
-            c.showPage()
-            y = height - 100
-
-    # Add summary at bottom
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(50, 100, f"Total Target: ${total_target:.2f}")
-    c.drawString(50, 80, f"Total Saved: ${total_saved:.2f}")
-    c.drawString(50, 60, f"Overall Progress: {(total_saved / total_target * 100):.1f}%")
-
-    c.setFont("Helvetica-Oblique", 10)
-    c.drawString(50, 40, f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-    c.save()
-
-    print(f"📄 Report generated: {file_path}")
-    print(f"💾 A copy has been saved to local storage in the 'Statements' folder.\n")
-    return file_path
-
-
-def open_pdf(file_path):
-    """Open the PDF file automatically."""
-    if os.name == 'nt':  # Windows
-        os.startfile(file_path)
-    elif os.name == 'posix':  # macOS/Linux
-        os.system(f"open '{file_path}'")
-    else:
-        print(f"Please open manually: {file_path}")
-
-
-def send_notification(title, message):
-    """Show a desktop notification."""
-    notification.notify(
-        title=title,
-        message=message,
-        timeout=10
-    )
-
-
-# ---------------- GOAL FUNCTIONS ----------------
+# ------------------------------
+# ➕ Add a new goal
+# ------------------------------
 def add_goal():
     name = input("Enter goal name: ")
     target = float(input("Enter target amount: "))
-
-    reminder_date = input("Enter reminder date (YYYY-MM-DD): ").strip()
-    reminder_time = input("Enter reminder time (HH:MM 24hr): ").strip()
-
-    cursor.execute(
-        "INSERT INTO goals (name, target_amount, reminder_date, reminder_time) VALUES (?, ?, ?, ?)",
-        (name, target, reminder_date, reminder_time)
-    )
+    current = float(input("Enter current amount (0 if none): "))
+    reminder_date = input("Enter reminder date (YYYY-MM-DD): ")
+    reminder_time = input("Enter reminder time (HH:MM): ")
+    cursor.execute("""
+        INSERT INTO goals (name, target_amount, current_amount, reminder_date, reminder_time)
+        VALUES (?, ?, ?, ?, ?)
+    """, (name, target, current, reminder_date, reminder_time))
     conn.commit()
-    print("✅ Goal added successfully with reminder!\n")
+    print(f"✅ Goal '{name}' added successfully!\n")
 
-
+# ------------------------------
+# 👀 View all goals
+# ------------------------------
 def view_goals():
-    cursor.execute("SELECT * FROM goals")
+    cursor.execute("SELECT id, name, target_amount, current_amount, reminder_date, reminder_time FROM goals")
     goals = cursor.fetchall()
     if not goals:
         print("No goals found.\n")
         return
-
-    print("\nYour Saving Goals:")
-    print("-" * 60)
+    print("\n🎯 Your Saving Goals:")
     for g in goals:
         id, name, target, current, r_date, r_time = g
-        percent = (current / target * 100) if target > 0 else 0
-        print(f"ID: {id}")
-        print(f"Goal: {name}")
-        print(f"Target: ${target:.2f}")
-        print(f"Saved: ${current:.2f} ({percent:.1f}%)")
-        if r_date:
-            print(f"Reminder Date: {r_date}")
-        if r_time:
-            print(f"Reminder Time: {r_time}")
-        print("-" * 60)
+        progress = (current / target) * 100 if target else 0
+        print(f"ID: {id} | {name} | Target: ₹{target:.2f} | Current: ₹{current:.2f} | Progress: {progress:.1f}% | Reminder: {r_date} {r_time}")
     print()
 
-
+# ------------------------------
+# ✏️ Update goal amount
+# ------------------------------
 def update_goal():
-    goal_id = input("Enter goal ID to update: ")
-    add_amount = float(input("Enter amount to add: "))
-    cursor.execute("SELECT current_amount FROM goals WHERE id = ?", (goal_id,))
-    goal = cursor.fetchone()
-
-    if goal:
-        new_amount = goal[0] + add_amount
-        cursor.execute("UPDATE goals SET current_amount = ? WHERE id = ?", (new_amount, goal_id))
-        conn.commit()
-        print("💰 Progress updated!\n")
-    else:
-        print("Goal not found.\n")
-
-
-def delete_goal():
-    goal_id = input("Enter goal ID to delete: ")
-    cursor.execute("DELETE FROM goals WHERE id = ?", (goal_id,))
+    view_goals()
+    goal_id = int(input("Enter Goal ID to update: "))
+    add_amt = float(input("Enter amount to add: "))
+    cursor.execute("UPDATE goals SET current_amount = current_amount + ? WHERE id = ?", (add_amt, goal_id))
     conn.commit()
-    print("🗑 Goal deleted.\n")
+    print("✅ Goal updated successfully!\n")
 
-
-# ---------------- REMINDER LOGIC ----------------
+# ------------------------------
+# 🔔 Check reminders
+# ------------------------------
 def check_reminders():
-    """Check reminders every minute and auto-open PDF."""
-    now = datetime.now()
-    today = now.date().isoformat()
-    current_time = now.strftime("%H:%M")
-
-    cursor.execute("SELECT id, name, reminder_date, reminder_time FROM goals WHERE reminder_date IS NOT NULL")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    cursor.execute("SELECT name FROM goals WHERE reminder_date || ' ' || reminder_time = ?", (now,))
     reminders = cursor.fetchall()
+    if reminders:
+        print("🔔 Reminder Alert!")
+        for r in reminders:
+            print(f"Don't forget your goal: {r[0]}")
+        print()
+    else:
+        print("No reminders right now.\n")
 
-    for g in reminders:
-        goal_id, name, r_date, r_time = g
-        if r_date == today and r_time == current_time:
-            send_notification("💰 Saving Reminder", f"Time to save for '{name}'! Opening progress report...")
-            print(f"🔔 Reminder triggered for '{name}' at {r_time}")
+# ------------------------------
+# 📄 Generate and Auto-Open PDF Report
+# ------------------------------
+def generate_pdf_report():
+    cursor.execute("SELECT id, name, target_amount, current_amount, reminder_date, reminder_time FROM goals")
+    goals = cursor.fetchall()
+    if not goals:
+        print("No goals to include in report.\n")
+        return
 
-            # Wait a few seconds to simulate “click”
-            time.sleep(5)
+    try:
+        # ✅ Create “Reports” folder on Desktop
+        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+        report_folder = os.path.join(desktop, "SavingGoalReports")
+        os.makedirs(report_folder, exist_ok=True)
 
-            # Generate and auto-open PDF report + save local statement
-            pdf_file = generate_pdf_report()
-            if pdf_file:
-                open_pdf(pdf_file)
+        # ✅ Set full path for PDF file
+        pdf_filename = os.path.join(report_folder, "Saving_Goals_Report.pdf")
 
+        # ✅ Generate PDF
+        c = canvas.Canvas(pdf_filename, pagesize=letter)
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(200, 760, "💰 Saving Goals Report")
 
-def reminder_loop():
-    """Run in background to check reminders every minute."""
+        c.setFont("Helvetica", 12)
+        c.drawString(100, 740, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+        y = 700
+        for g in goals:
+            id, name, target, current, r_date, r_time = g
+            progress = (current / target) * 100 if target else 0
+            c.drawString(100, y, f"ID: {id} | {name} | Target: ₹{target:.2f} | Current: ₹{current:.2f} | Progress: {progress:.1f}%")
+            c.drawString(100, y - 15, f"Reminder: {r_date} {r_time}")
+            y -= 40
+
+            if y < 80:
+                c.showPage()
+                c.setFont("Helvetica", 12)
+                y = 750
+
+        c.save()
+
+        # ✅ Show success and open PDF
+        print(f"\n✅ PDF Report saved successfully at: {pdf_filename}")
+        webbrowser.open_new(pdf_filename)
+
+    except Exception as e:
+        print(f"❌ Error generating PDF: {e}")
+
+# ------------------------------
+# 🧭 Main Menu
+# ------------------------------
+def main_menu():
     while True:
-        check_reminders()
-        time.sleep(60)
+        print("========= 💰 Saving Goal Tracker =========")
+        print("1. Add Goal")
+        print("2. View Goals")
+        print("3. Update Goal")
+        print("4. Check Reminders")
+        print("5. Generate PDF Report")
+        print("6. Exit")
+        choice = input("Enter choice (1-6): ")
 
-
-# ---------------- MAIN APP ----------------
-def main():
-    print("=== 💰 Saving Goal Tracker (Auto PDF + Local Statement) ===")
-
-    # Start background reminder thread
-    reminder_thread = threading.Thread(target=reminder_loop, daemon=True)
-    reminder_thread.start()
-
-    while True:
-        print("\nChoose an option:")
-        print("1️⃣  Add new goal")
-        print("2️⃣  View goals")
-        print("3️⃣  Update goal progress")
-        print("4️⃣  Delete goal")
-        print("5️⃣  Generate & Save progress PDF manually")
-        print("6️⃣  Exit")
-
-        choice = input("Enter your choice: ")
-
-        if choice == '1':
+        if choice == "1":
             add_goal()
-        elif choice == '2':
+        elif choice == "2":
             view_goals()
-        elif choice == '3':
+        elif choice == "3":
             update_goal()
-        elif choice == '4':
-            delete_goal()
-        elif choice == '5':
-            pdf = generate_pdf_report()
-            if pdf:
-                open_pdf(pdf)
-        elif choice == '6':
+        elif choice == "4":
+            check_reminders()
+        elif choice == "5":
+            generate_pdf_report()
+        elif choice == "6":
             print("Goodbye! 👋")
             break
         else:
-            print("Invalid choice, try again.\n")
+            print("❌ Invalid choice. Try again.\n")
 
-
+# ------------------------------
+# 🚀 Run Program
+# ------------------------------
 if __name__ == "__main__":
-    main()
-    conn.close()
+    main_menu()
