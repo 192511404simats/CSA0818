@@ -1,0 +1,128 @@
+#climb
+def climb(n):
+    if n<1:
+        return 0
+    elif n==1 :
+        return 1
+    elif n==2:
+        return 2
+    else:
+        return climb(n-1)+climb(n-2)
+n=int(input('enter a destination'.upper()))
+print('there are '.upper(),climb(n),'ways'.upper())
+
+#perfect_squares
+def perfect_squares():
+    count=0
+    n=int(input('enter a number'.upper()))
+    for i in range(1,n+1):
+        if (i**0.5).is_integer():
+            count+=1
+    print('there are '.upper(),count,'perfect numbers within '.upper(),n)
+perfect_squares()
+
+#frequency
+def frequency():
+    l=eval(input('enter a list'.upper()))
+    rep=[]
+    for i in l:
+        if l.count(i)>1:
+            rep.append(i)
+    for i in rep:
+        print('THE REPEATED NUMBER IS',i)
+        break
+frequency()
+
+
+#profit difficulty workers
+difficulty=[2,4,6,8,10]
+profit=[10,20,30,40,50]
+worker=[4,5,6,7]
+total_profit=0
+for w in worker:
+    max_p=0
+    for i in range(len(difficulty)):
+        if w>=difficulty[i]:
+            if profit[i]> max_p:
+                max_p=profit[i]
+    total_profit+=max_p
+print(total_profit)
+
+
+#IGHEST FREQUENCY
+l=eval(input('enter a list'.upper()))
+d={}
+for i in l:
+    if i not in d:
+        d[i]=1
+    else:
+        d[i]+=1
+m=max(d.values())
+for k,v in d.items():
+    print(k,'    |    ',v)
+    if v==m:
+        a=k
+print('THIS IS THE ELEMENT WITH HIGHEST FREQUENCY:',a)
+
+
+#INDEX OF THE PEAK NUMBER
+l=[1,2,3,4,5,9,7,4,1,2,5,8]
+print(f"THE INDEX OF THE PEAK NUMBER ({max(l)}) IS ",l.index(max(l)))
+
+
+
+#lucky number
+n=int(input('ENTER A NUMBER:'))
+x=str(n)
+sum=0
+prod=1
+for i in x:
+    sum+=int(i)
+    prod*=int(i)
+if sum == prod:
+    print(f"yes {n} is a lucky number")
+else:
+    print(f"no {n} is not a lucky number")
+
+
+#Matrix multiplication
+x=[[1,2,3],[4,5,6],[7,8,9]]
+y=[[1,1,1],[2,2,2],[3,3,3]]
+result=[[0,0,0],[0,0,0],[0,0,0]]
+for i in range(len(x)):
+    for j in range(len(y[0])):
+        for k in range(len(y)):
+            result[i][j]+=x[i][k]*y[k][j]
+for r in result:
+    print(r)
+
+
+#Matrix addition
+x=[[1,2,3],[4,5,6],[7,8,9]]
+y=[[1,1,1],[2,2,2],[3,3,3]]
+result=[[0,0,0],[0,0,0],[0,0,0]]
+for i in range(len(x)):
+    for j in range(len(x)):
+            result[i][j]=x[i][j]+y[i][j]
+for r in result:
+    print(r)
+
+
+
+# prime or composite
+a=int(input('ENTER A STARTING RANGE:'))
+b=int(input('ENTER A ENDING RANGE:'))
+
+for i in range(a,b+1):
+    composite=False
+    if i==0 or i==1:
+        print(i,"is neither prime nor composite" )
+    
+    else:
+        for j in range(2,int(i**0.5)+1):
+            if i%j==0:
+                composite=True
+        if composite:
+            print(f"{i} is composite")
+        else:
+            print(f"{i} is prime")
