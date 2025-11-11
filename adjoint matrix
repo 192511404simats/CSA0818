@@ -1,0 +1,29 @@
+# Function to calculate determinant of 2x2 matrix
+def det2x2(matrix):
+    return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0]
+
+# Function to get minor of element (i,j) in 3x3 matrix
+def minor(matrix, i, j):
+    return [[matrix[row][col] for col in range(3) if col != j] 
+            for row in range(3) if row != i]
+
+# Function to calculate adjoint of 3x3 matrix
+def adjoint(matrix):
+    adj = [[0]*3 for _ in range(3)]
+    for i in range(3):
+        for j in range(3):
+            # Cofactor = (-1)^(i+j) * determinant of minor
+            adj[j][i] = ((-1)**(i+j)) * det2x2(minor(matrix, i, j))
+            # Note: adj[j][i] instead of adj[i][j] to transpose directly
+    return adj
+
+# Example matrix
+A = [[1, 2, 3],
+     [0, 4, 5],
+     [1, 0, 6]]
+
+adj = adjoint(A)
+
+print("Adjoint of A:")
+for row in adj:
+    print(row)
